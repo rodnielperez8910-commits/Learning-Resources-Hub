@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LR — Learning Resources Hub</title>
+
+  <!-- Google Fonts: Space Grotesk (Headings) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase JS SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="LR.css" />
+</head>
+<body>
+  <!-- Parallax Background Decorative Layers -->
+  <div class="parallax-bg" aria-hidden="true">
+    <div class="parallax-shape shape-1" data-speed="0.06"></div>
+    <div class="parallax-shape shape-2" data-speed="-0.08"></div>
+    <div class="parallax-dots" data-speed="0.04"></div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- App Shell -->
+  <div class="app-shell">
+    <!-- FLOATING LEFT SIDEBAR (Desktop) / TOP COMPACT BAR (Mobile) -->
+    <aside class="sidebar neu-surface" aria-label="Primary Navigation">
+      <div class="sidebar-header">
+        <a href="#home" class="brand-logo" data-nav="home">
+          <div class="logo-emblem">
+            <span>LR</span>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Learning Resources</span>
+            <span class="brand-sub">Digital Hub</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav" id="primary-nav">
+        <button class="nav-item active" data-nav="home" title="Home">
+          <span class="nav-icon"><i data-lucide="home"></i></span>
+          <span class="nav-label">Home</span>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+        <button class="nav-item" data-nav="books" title="Books">
+          <span class="nav-icon"><i data-lucide="book-open"></i></span>
+          <span class="nav-label">Books</span>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+        <button class="nav-item" data-nav="bulletin" title="Bulletin Board">
+          <span class="nav-icon"><i data-lucide="megaphone"></i></span>
+          <span class="nav-label">Bulletin Board</span>
+          <span class="nav-badge" id="bulletin-count-badge" hidden>0</span>
+        </button>
+        <button class="nav-item" data-nav="settings" title="Settings">
+          <span class="nav-icon"><i data-lucide="settings"></i></span>
+          <span class="nav-label">Settings</span>
+        </button>
+        <button class="nav-item" data-nav="feedback" title="Feedback">
+          <span class="nav-icon"><i data-lucide="message-square"></i></span>
+          <span class="nav-label">Feedback</span>
+        </button>
+        <button class="nav-item" data-nav="credits" title="Credits">
+          <span class="nav-icon"><i data-lucide="award"></i></span>
+          <span class="nav-label">Credits</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Bottom User Summary (Desktop) -->
+      <div class="sidebar-footer" id="sidebar-user-card" hidden>
+        <div class="sidebar-avatar-wrap" id="sidebar-profile-trigger" role="button" tabindex="0" aria-label="Open User Profile">
+          <img id="sidebar-avatar-img" src="" alt="Profile" class="avatar-img" hidden />
+          <div id="sidebar-avatar-fallback" class="avatar-fallback">LR</div>
+          <div class="sidebar-user-meta">
+            <strong id="sidebar-user-name">Student Name</strong>
+            <span id="sidebar-user-email">user@school.edu</span>
+            <span class="role-pill" id="sidebar-user-role">Student</span>
+          </div>
+        </div>
+        <button class="btn-primary-pill full-width" id="sidebar-logout-btn">
+          <i data-lucide="log-out"></i> Log Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT BOARD -->
+    <div class="main-wrapper">
+      <!-- Top Utility Header -->
+      <header class="topbar">
+        <div class="topbar-title-group">
+          <h1 id="page-heading">Home</h1>
+          <span id="page-subheading" class="topbar-sub">Learning Resources Hub</span>
+        </div>
+
+        <div class="topbar-actions">
+          <!-- Theme Toggle -->
+          <button id="theme-toggle-btn" class="neu-icon-btn" aria-label="Toggle Light and Dark Mode" title="Toggle Theme">
+            <i data-lucide="sun" id="theme-icon-sun"></i>
+            <i data-lucide="moon" id="theme-icon-moon" hidden></i>
+          </button>
+
+          <!-- Admin Panel Button (Admins Only) -->
+          <button id="admin-panel-btn" class="neu-icon-btn admin-accent-btn" hidden aria-label="Open Admin Panel" title="Admin Panel">
+            <i data-lucide="shield-check"></i>
+            <span class="btn-text-desktop">Admin Panel</span>
+          </button>
+
+          <!-- Guest Auth Buttons -->
+          <div id="guest-auth-controls" class="auth-btn-group">
+            <button id="open-signin-btn" class="neu-btn">Sign In</button>
+            <button id="open-signup-btn" class="btn-primary-pill">Sign Up</button>
+          </div>
+
+          <!-- Authenticated User Profile Button -->
+          <button id="user-profile-btn" class="neu-profile-trigger" hidden aria-label="User Profile Panel">
+            <img id="topbar-avatar-img" src="" alt="Avatar" class="avatar-sm" hidden />
+            <span id="topbar-avatar-fallback" class="avatar-sm-fallback">U</span>
+            <span id="topbar-username" class="topbar-username">User</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- DYNAMIC PAGE SECTIONS -->
+      <main class="content-board neu-board" id="main-content">
+        <!-- ==================== 1. HOME SECTION ==================== -->
+        <section id="section-home" class="page-section active" aria-labelledby="home-welcome-title">
+          <!-- Hero Card with Parallax Layers -->
+          <div class="hero-card neu-card parallax-hero">
+            <div class="hero-content" data-speed="0.02">
+              <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span>LR Official Digital Library</span>
+              </div>
+              <h2 id="home-welcome-title" class="hero-title">Welcome to Learning Resources Hub</h2>
+              <p id="home-welcome-subtitle" class="hero-subtitle">
+                Explore curated academic collections, digital references, and campus publications.
+              </p>
+              <p id="home-library-intro" class="hero-intro">
+                Designed for students and educators, LR connects you seamlessly to knowledge—track real-time book availability, reserve titles instantly, and stay updated with library bulletins.
+              </p>
+
+              <!-- Book Search Shortcut -->
+              <form id="home-search-form" class="neu-search-bar hero-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="home-search-input" placeholder="Search books by title, author, or publisher..." aria-label="Search books" />
+                <button type="submit" class="btn-primary-pill">Search</button>
+              </form>
+
+              <!-- Navigation Shortcuts -->
+              <div class="shortcut-pills">
+                <button class="neu-pill-btn" data-nav="books">
+                  <i data-lucide="library"></i> Browse Catalog
+                </button>
+                <button class="neu-pill-btn" data-nav="bulletin">
+                  <i data-lucide="bell"></i> Latest Bulletins
+                </button>
+                <button class="neu-pill-btn" id="home-my-borrows-shortcut">
+                  <i data-lucide="bookmark-check"></i> My Borrowed Books
+                </button>
+                <button class="neu-pill-btn admin-only-inline" id="home-customize-btn" hidden>
+                  <i data-lucide="sliders"></i> Customize Homepage
+                </button>
+              </div>
+            </div>
+
+            <!-- Library Live Metrics (Inspired by Reference Dashboard Cards) -->
+            <div class="hero-metrics" data-speed="-0.02">
+              <div class="metric-card neu-inset-card">
+                <div class="metric-icon blue"><i data-lucide="book"></i></div>
+                <div>
+                  <span class="metric-label">Total Catalog</span>
+                  <strong class="metric-value" id="stat-total-books">0</strong>
+                  <span class="metric-sub">Registered volumes</span>
+                </div>
+              </div>
+              <div class="metric-card neu-inset-card">
+                <div class="metric-icon teal"><i data-lucide="check-circle-2"></i></div>
+                <div>
+                  <span class="metric-label">Available Now</span>
+                  <strong class="metric-value" id="stat-available-books">0</strong>
+                  <span class="metric-sub">Ready to borrow</span>
+                </div>
+              </div>
+              <div class="metric-card neu-inset-card">
+                <div class="metric-icon indigo"><i data-lucide="layers"></i></div>
+                <div>
+                  <span class="metric-label">Categories</span>
+                  <strong class="metric-value" id="stat-total-categories">0</strong>
+                  <span class="metric-sub">Academic subjects</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured Books Section -->
+          <div id="home-featured-wrapper" class="home-block">
+            <div class="section-header-row">
+              <div>
+                <h3>Featured Books</h3>
+                <p class="section-desc">Curated highlights selected by library administrators</p>
+              </div>
+              <button class="neu-btn sm" data-nav="books">View All <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div id="home-featured-grid" class="books-grid"></div>
+          </div>
+
+          <!-- Recently Added Books -->
+          <div id="home-recent-wrapper" class="home-block">
+            <div class="section-header-row">
+              <div>
+                <h3>Recently Added Books</h3>
+                <p class="section-desc">Latest additions to the Learning Resources Hub</p>
+              </div>
+            </div>
+            <div id="home-recent-grid" class="books-grid"></div>
+          </div>
+
+          <!-- Latest Announcements Preview -->
+          <div id="home-announcements-wrapper" class="home-block">
+            <div class="section-header-row">
+              <div>
+                <h3>Latest Announcements</h3>
+                <p class="section-desc">Important updates, schedules, and library notices</p>
+              </div>
+              <button class="neu-btn sm" data-nav="bulletin">Bulletin Board <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div id="home-announcements-grid" class="announcements-grid"></div>
+          </div>
+        </section>
+
+        <!-- ==================== 2. BOOKS SECTION ==================== -->
+        <section id="section-books" class="page-section" hidden>
+          <div class="books-toolbar neu-card">
+            <div class="neu-search-bar flex-1">
+              <i data-lucide="search"></i>
+              <input type="text" id="books-search-input" placeholder="Search by title, author, or publisher..." aria-label="Filter books" />
+              <button type="button" id="books-clear-search" class="icon-clear-btn" hidden aria-label="Clear search">
+                <i data-lucide="x"></i>
+              </button>
+            </div>
+
+            <div class="toolbar-controls">
+              <select id="books-availability-filter" class="neu-select" aria-label="Filter by availability">
+                <option value="all">All Statuses</option>
+                <option value="available">Available Only</option>
+                <option value="unavailable">Unavailable</option>
+              </select>
+
+              <!-- Admin '+' Floating Action Dropdown -->
+              <div class="admin-fab-wrapper admin-only-inline" id="books-admin-fab" hidden>
+                <button type="button" id="books-plus-btn" class="btn-primary-pill fab-plus" aria-expanded="false" aria-label="Add Book or Category">
+                  <i data-lucide="plus"></i> <span>Manage</span>
+                </button>
+                <div id="books-plus-menu" class="glass-dropdown" hidden>
+                  <button type="button" id="open-add-category-btn">
+                    <i data-lucide="folder-plus"></i> A. Create Book Category
+                  </button>
+                  <button type="button" id="open-add-book-btn">
+                    <i data-lucide="book-plus"></i> B. Add a Book
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="category-pills-bar" id="category-filter-pills" role="tablist" aria-label="Book Categories">
+            <button class="cat-pill active" data-category="all">All Books</button>
+          </div>
+
+          <!-- Books Catalog Grid -->
+          <div id="books-catalog-grid" class="books-grid"></div>
+          <div id="books-empty-state" class="empty-state neu-inset-card" hidden>
+            <i data-lucide="book-x"></i>
+            <h4>No matching books found</h4>
+            <p>Try adjusting your search keywords or selecting a different category.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 3. BULLETIN BOARD SECTION ==================== -->
+        <section id="section-bulletin" class="page-section" hidden>
+          <div class="section-header-row">
+            <div>
+              <h2>Library Bulletin Board</h2>
+              <p class="section-desc">Official announcements, events, and operational notices</p>
+            </div>
+            <button id="bulletin-plus-btn" class="btn-primary-pill admin-only-inline" hidden>
+              <i data-lucide="plus"></i> New Announcement
+            </button>
+          </div>
+
+          <div id="bulletin-grid" class="announcements-grid full"></div>
+          <div id="bulletin-empty-state" class="empty-state neu-inset-card" hidden>
+            <i data-lucide="megaphone-off"></i>
+            <h4>No announcements posted yet</h4>
+            <p>Check back later for updates from the Learning Resources team.</p>
+          </div>
+        </section>
+
+        <!-- ==================== 4. SETTINGS SECTION ==================== -->
+        <section id="section-settings" class="page-section" hidden>
+          <div class="settings-grid">
+            <!-- A. Administrator Access -->
+            <div class="neu-card settings-card">
+              <div class="card-head-icon">
+                <div class="metric-icon blue"><i data-lucide="key-round"></i></div>
+                <div>
+                  <h3>A. Administrator Access</h3>
+                  <p class="section-desc">Verify your official administrator authorization code</p>
+                </div>
+              </div>
+              <div id="admin-verified-banner" class="status-banner success" hidden>
+                <i data-lucide="shield-check"></i>
+                <span>Verified Administrator Privileges Active</span>
+              </div>
+              <form id="admin-code-form" class="stacked-form">
+                <label class="field-label" for="admin-access-code">Administrator Code</label>
+                <div class="input-action-row">
+                  <input type="password" id="admin-access-code" class="neu-input" placeholder="Enter administrator access code" autocomplete="off" required />
+                  <button type="submit" id="verify-admin-btn" class="btn-primary-pill">Verify</button>
+                </div>
+                <small class="field-hint">Verified securely via server-side authorization. Requires an active signed-in account.</small>
+              </form>
+            </div>
+
+            <!-- B. Appearance Settings -->
+            <div class="neu-card settings-card">
+              <div class="card-head-icon">
+                <div class="metric-icon indigo"><i data-lucide="palette"></i></div>
+                <div>
+                  <h3>B. Appearance Settings</h3>
+                  <p class="section-desc">Customize theme polarity and reading text scale</p>
+                </div>
+              </div>
+              <div class="settings-control-row">
+                <span>Color Theme</span>
+                <div class="segmented-control">
+                  <button type="button" id="set-light-mode" class="seg-btn active"><i data-lucide="sun"></i> Light Mode</button>
+                  <button type="button" id="set-dark-mode" class="seg-btn"><i data-lucide="moon"></i> Dark Mode</button>
+                </div>
+              </div>
+              <div class="settings-control-row">
+                <span>Text Size (<strong id="text-size-label">100%</strong>)</span>
+                <div class="segmented-control">
+                  <button type="button" id="decrease-text-btn" class="seg-btn" aria-label="Decrease Text Size"><i data-lucide="minus"></i> Decrease</button>
+                  <button type="button" id="reset-text-btn" class="seg-btn" aria-label="Reset Text Size">Reset</button>
+                  <button type="button" id="increase-text-btn" class="seg-btn" aria-label="Increase Text Size"><i data-lucide="plus"></i> Increase</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- C. Notification Settings -->
+            <div class="neu-card settings-card">
+              <div class="card-head-icon">
+                <div class="metric-icon teal"><i data-lucide="bell-ring"></i></div>
+                <div>
+                  <h3>C. Notification Settings</h3>
+                  <p class="section-desc">Control alerts for due dates and library bulletins</p>
+                </div>
+              </div>
+              <div class="settings-control-row">
+                <span>System Notifications</span>
+                <label class="neu-switch">
+                  <input type="checkbox" id="pref-notifications-enabled" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="settings-control-row">
+                <span>Return Due Date Reminders</span>
+                <label class="neu-switch">
+                  <input type="checkbox" id="pref-notify-due" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="settings-control-row">
+                <span>New Announcement Alerts</span>
+                <label class="neu-switch">
+                  <input type="checkbox" id="pref-notify-announcements" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <button type="button" id="save-notif-prefs-btn" class="neu-btn">Save Notification Preferences</button>
+            </div>
+
+            <!-- D. Account Settings -->
+            <div class="neu-card settings-card">
+              <div class="card-head-icon">
+                <div class="metric-icon blue"><i data-lucide="user-cog"></i></div>
+                <div>
+                  <h3>D. Account Settings</h3>
+                  <p class="section-desc">Update credentials, email, and personal contact details</p>
+                </div>
+              </div>
+              <div id="account-settings-guest-msg" class="empty-state neu-inset-card">
+                <p>Sign in to manage your account information and password.</p>
+                <button type="button" class="btn-primary-pill" id="settings-signin-prompt">Sign In Now</button>
+              </div>
+              <form id="account-settings-form" class="stacked-form" hidden>
+                <div class="form-grid-2">
+                  <div>
+                    <label class="field-label" for="set-username">Username</label>
+                    <input type="text" id="set-username" class="neu-input" required />
+                  </div>
+                  <div>
+                    <label class="field-label" for="set-email">Email Address</label>
+                    <input type="email" id="set-email" class="neu-input" required />
+                  </div>
+                </div>
+                <div class="form-grid-2">
+                  <div>
+                    <label class="field-label" for="set-address">Home Address</label>
+                    <input type="text" id="set-address" class="neu-input" placeholder="Street, City, Province" />
+                  </div>
+                  <div>
+                    <label class="field-label" for="set-school">School / Department Info</label>
+                    <input type="text" id="set-school" class="neu-input" placeholder="Grade / Section / Faculty" />
+                  </div>
+                </div>
+                <div>
+                  <label class="field-label" for="set-new-password">New Password (leave blank to keep current)</label>
+                  <input type="password" id="set-new-password" class="neu-input" minlength="6" placeholder="Minimum 6 characters" />
+                </div>
+                <button type="submit" class="btn-primary-pill">Save Changes</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 5. FEEDBACK SECTION ==================== -->
+        <section id="section-feedback" class="page-section" hidden>
+          <div class="feedback-layout">
+            <div class="neu-card">
+              <h2>Submit Library Feedback</h2>
+              <p class="section-desc">Suggest new titles, report issues, or share ideas to improve Learning Resources Hub.</p>
+
+              <div id="feedback-guest-notice" class="status-banner info" hidden>
+                <i data-lucide="info"></i>
+                <span>Please sign in to submit feedback and track your submission history.</span>
+              </div>
+
+              <form id="feedback-form" class="stacked-form">
+                <div>
+                  <label class="field-label" for="fb-name">Full Name</label>
+                  <input type="text" id="fb-name" class="neu-input" readonly placeholder="Automatically retrieved from account" />
+                </div>
+                <div>
+                  <label class="field-label" for="fb-subject">Feedback Subject</label>
+                  <input type="text" id="fb-subject" class="neu-input" placeholder="e.g., Book Request: Clean Code" required />
+                </div>
+                <div>
+                  <label class="field-label" for="fb-message">Feedback Message</label>
+                  <textarea id="fb-message" class="neu-input" rows="5" placeholder="Write your message here..." required></textarea>
+                </div>
+                <button type="submit" id="fb-submit-btn" class="btn-primary-pill">
+                  <i data-lucide="send"></i> Submit Feedback
+                </button>
+              </form>
+            </div>
+
+            <div class="neu-card">
+              <h3>My Feedback History</h3>
+              <p class="section-desc">Your private submissions and timestamps</p>
+              <div id="my-feedback-list" class="stacked-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 6. CREDITS SECTION ==================== -->
+        <section id="section-credits" class="page-section" hidden>
+          <div class="neu-card credits-hero">
+            <div class="logo-emblem lg"><span>LR</span></div>
+            <h2>Learning Resources Hub</h2>
+            <p class="section-desc">Built to empower students, educators, and library administrators with modern digital access.</p>
+          </div>
+
+          <div class="credits-grid">
+            <div class="neu-card">
+              <div class="metric-icon blue"><i data-lucide="code-2"></i></div>
+              <h3>Website Developers</h3>
+              <p>Full-Stack Architecture, Supabase PostgreSQL Schema, Row-Level Security Policies, and Atomic Borrowing Engine.</p>
+              <ul class="credit-list">
+                <li>Lead Systems Architect — LR Development Team</li>
+                <li>Database &amp; Security Engineering — Supabase Auth &amp; RPC</li>
+              </ul>
+            </div>
+
+            <div class="neu-card">
+              <div class="metric-icon indigo"><i data-lucide="figma"></i></div>
+              <h3>UI/UX Designers</h3>
+              <p>Neumorphic Surface System, Translucent Glassmorphism Overlays, Parallax Depth Layers, and Responsive Accessibility.</p>
+              <ul class="credit-list">
+                <li>Design System Lead — Soft Tactile Dashboard Interface</li>
+                <li>Typography &amp; Theme Polarity — Space Grotesk &amp; Inter</li>
+              </ul>
+            </div>
+
+            <div class="neu-card">
+              <div class="metric-icon teal"><i data-lucide="users"></i></div>
+              <h3>Contributors</h3>
+              <p>Catalog curation, metadata verification, student usability testing, and faculty library workflow consultation.</p>
+              <ul class="credit-list">
+                <li>School Library &amp; Media Center Coordinators</li>
+                <li>Student Beta Testing &amp; Accessibility Reviewers</li>
+              </ul>
+            </div>
+
+            <div class="neu-card">
+              <div class="metric-icon blue"><i data-lucide="heart-handshake"></i></div>
+              <h3>Acknowledgments</h3>
+              <p>Special gratitude to the open-source ecosystem and academic community supporting accessible education.</p>
+              <ul class="credit-list">
+                <li>Supabase Open-Source Cloud Infrastructure</li>
+                <li>Lucide Icons &amp; Google Fonts Typography</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== GLASSMORPHISM FLOATING PANELS & MODALS ==================== -->
+
+  <!-- 1. AUTHENTICATION MODAL (Sign In / Sign Up) -->
+  <div id="auth-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="auth-modal" aria-label="Close"><i data-lucide="x"></i></button>
+
+      <div class="auth-tabs">
+        <button type="button" id="tab-signin" class="auth-tab active">Sign In</button>
+        <button type="button" id="tab-signup" class="auth-tab">Sign Up</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="signin-form" class="stacked-form">
+        <h2 id="auth-modal-title">Welcome Back to LR</h2>
+        <p class="section-desc">Sign in with your registered username and password.</p>
+        <div>
+          <label class="field-label" for="signin-username">Username</label>
+          <input type="text" id="signin-username" class="neu-input" required autocomplete="username" />
+        </div>
+        <div>
+          <label class="field-label" for="signin-password">Password</label>
+          <input type="password" id="signin-password" class="neu-input" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-primary-pill full-width">Sign In</button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="signup-form" class="stacked-form" hidden>
+        <h2>Create LR Account</h2>
+        <p class="section-desc">Register as a Student or Teacher to borrow books and manage resources.</p>
+        <div class="form-grid-3">
+          <div>
+            <label class="field-label" for="reg-first-name">First Name</label>
+            <input type="text" id="reg-first-name" class="neu-input" required />
+          </div>
+          <div>
+            <label class="field-label" for="reg-middle-initial">M.I.</label>
+            <input type="text" id="reg-middle-initial" class="neu-input" maxlength="2" placeholder="A" />
+          </div>
+          <div>
+            <label class="field-label" for="reg-last-name">Last Name</label>
+            <input type="text" id="reg-last-name" class="neu-input" required />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="field-label" for="reg-birthday">Birthday (MM/DD/YY)</label>
+            <input type="date" id="reg-birthday" class="neu-input" required />
+          </div>
+          <div>
+            <label class="field-label" for="reg-account-type">Account Type</label>
+            <select id="reg-account-type" class="neu-select" required>
+              <option value="Student">Student</option>
+              <option value="Teacher">Teacher</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
+            <label class="field-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="neu-input" required autocomplete="email" />
+          </div>
+          <div>
+            <label class="field-label" for="reg-username">Username</label>
+            <input type="text" id="reg-username" class="neu-input" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label" for="reg-password">Password</label>
+          <input type="password" id="reg-password" class="neu-input" minlength="6" required autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn-primary-pill full-width">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. USER PROFILE FLOATING GLASSMORPHISM PANEL -->
+  <div id="profile-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="profile-panel-title">
+    <div class="glass-panel modal-lg">
+      <button type="button" class="glass-close-btn" data-close-modal="profile-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="profile-panel-title">Account &amp; Borrowing Profile</h2>
+
+      <div class="profile-panel-grid">
+        <!-- Left: Avatar & Account Info -->
+        <div class="profile-summary-col">
+          <div class="avatar-upload-box">
+            <img id="panel-avatar-img" src="" alt="User Profile Picture" class="avatar-xl" hidden />
+            <div id="panel-avatar-fallback" class="avatar-xl-fallback">LR</div>
+            <label for="profile-pic-input" class="neu-btn sm upload-label">
+              <i data-lucide="camera"></i> Upload Photo
+            </label>
+            <input type="file" id="profile-pic-input" accept="image/*" hidden />
+          </div>
+
+          <div class="account-meta-box neu-inset-card">
+            <p><strong>Full Name:</strong> <span id="panel-full-name">—</span></p>
+            <p><strong>Account Type:</strong> <span id="panel-account-type">—</span></p>
+            <p><strong>Role:</strong> <span id="panel-role-badge">Member</span></p>
+            <p><strong>Email:</strong> <span id="panel-email">—</span></p>
+            <p><strong>Birthday:</strong> <span id="panel-birthday">—</span></p>
+          </div>
+
+          <button type="button" id="panel-logout-btn" class="neu-btn danger full-width">
+            <i data-lucide="log-out"></i> Log Out
+          </button>
+        </div>
+
+        <!-- Right: Editable Fields & Borrowing Records -->
+        <div class="profile-edit-col">
+          <form id="profile-edit-form" class="stacked-form">
+            <div class="form-grid-2">
+              <div>
+                <label class="field-label" for="prof-username">Username</label>
+                <input type="text" id="prof-username" class="neu-input" required />
+              </div>
+              <div>
+                <label class="field-label" for="prof-password">New Password (Optional)</label>
+                <input type="password" id="prof-password" class="neu-input" minlength="6" placeholder="••••••••" />
+              </div>
+            </div>
+            <div>
+              <label class="field-label" for="prof-address">Home Address</label>
+              <input type="text" id="prof-address" class="neu-input" placeholder="Enter home address" />
+            </div>
+            <div>
+              <label class="field-label" for="prof-school">School Information</label>
+              <input type="text" id="prof-school" class="neu-input" placeholder="School name, grade level, or department" />
+            </div>
+            <button type="submit" class="btn-primary-pill">Save Profile Changes</button>
+          </form>
+
+          <hr class="soft-divider" />
+          <h3>My Borrowing Records</h3>
+          <div id="user-borrowing-records" class="stacked-list compact-scroll"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. BOOK DETAILS & BORROWING PANEL -->
+  <div id="book-detail-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="detail-book-title">
+    <div class="glass-panel modal-lg">
+      <button type="button" class="glass-close-btn" data-close-modal="book-detail-modal" aria-label="Close"><i data-lucide="x"></i></button>
+
+      <div class="book-detail-layout">
+        <div class="book-detail-cover-wrap">
+          <img id="detail-book-cover" src="" alt="Book Cover" class="detail-cover-img" />
+          <span id="detail-status-badge" class="status-pill available">Available</span>
+        </div>
+
+        <div class="book-detail-info">
+          <span id="detail-book-category" class="category-chip">Category</span>
+          <h2 id="detail-book-title">Book Title</h2>
+          <p class="book-author-line">By <strong id="detail-book-author">Author</strong> &bull; Published by <span id="detail-book-publisher">Publisher</span></p>
+
+          <div class="quantity-pills">
+            <div class="qty-box neu-inset-card">
+              <span>Total Quantity</span>
+              <strong id="detail-total-qty">0</strong>
+            </div>
+            <div class="qty-box neu-inset-card">
+              <span>Available Copies</span>
+              <strong id="detail-avail-qty">0</strong>
+            </div>
+          </div>
+
+          <p id="detail-book-desc" class="book-description">No description provided.</p>
+
+          <!-- Primary Borrow Trigger -->
+          <div class="detail-actions">
+            <button type="button" id="initiate-borrow-btn" class="btn-primary-pill">Borrow a Book</button>
+            <div id="detail-admin-controls" class="admin-only-inline" hidden>
+              <button type="button" id="edit-current-book-btn" class="neu-btn"><i data-lucide="edit-3"></i> Edit</button>
+              <button type="button" id="delete-current-book-btn" class="neu-btn danger"><i data-lucide="trash-2"></i> Delete</button>
+            </div>
+          </div>
+
+          <!-- Inline Borrowing Form (Revealed when Borrow is clicked) -->
+          <form id="borrow-book-form" class="neu-inset-card stacked-form borrow-subform" hidden>
+            <h4>Confirm Book Borrowing</h4>
+            <div class="form-grid-2">
+              <div>
+                <label class="field-label" for="borrow-book-title">Book Title</label>
+                <input type="text" id="borrow-book-title" class="neu-input" readonly />
+              </div>
+              <div>
+                <label class="field-label" for="borrow-user-fullname">Borrower's Full Name</label>
+                <input type="text" id="borrow-user-fullname" class="neu-input" readonly />
+              </div>
+            </div>
+            <div class="form-grid-2">
+              <div>
+                <label class="field-label" for="borrow-date">Borrowing Date</label>
+                <input type="date" id="borrow-date" class="neu-input" required />
+              </div>
+              <div>
+                <label class="field-label" for="borrow-return-date">Expected Return Date</label>
+                <input type="date" id="borrow-return-date" class="neu-input" required />
+              </div>
+            </div>
+            <div class="form-btn-row">
+              <button type="submit" class="btn-primary-pill">Confirm &amp; Borrow</button>
+              <button type="button" id="cancel-borrow-btn" class="neu-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADMIN: ADD/EDIT BOOK MODAL -->
+  <div id="book-editor-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="book-editor-title">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="book-editor-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="book-editor-title">Add a Book</h2>
+
+      <form id="book-editor-form" class="stacked-form">
+        <input type="hidden" id="edit-book-id" />
+        <div>
+          <label class="field-label" for="book-form-title">Book Title</label>
+          <input type="text" id="book-form-title" class="neu-input" required />
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="field-label" for="book-form-category">Category</label>
+            <select id="book-form-category" class="neu-select" required></select>
+          </div>
+          <div>
+            <label class="field-label" for="book-form-quantity">Total Quantity</label>
+            <input type="number" id="book-form-quantity" class="neu-input" min="1" value="1" required />
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div>
+            <label class="field-label" for="book-form-author">Author</label>
+            <input type="text" id="book-form-author" class="neu-input" required />
+          </div>
+          <div>
+            <label class="field-label" for="book-form-publisher">Publisher</label>
+            <input type="text" id="book-form-publisher" class="neu-input" required />
+          </div>
+        </div>
+        <div>
+          <label class="field-label" for="book-form-cover">Book Cover Image Upload</label>
+          <input type="file" id="book-form-cover" class="neu-input" accept="image/*" />
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="book-form-featured" />
+          <label for="book-form-featured">Feature this book on the Homepage</label>
+        </div>
+        <div>
+          <label class="field-label" for="book-form-desc">Description (Optional)</label>
+          <textarea id="book-form-desc" class="neu-input" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn-primary-pill full-width">Save Book Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. ADMIN: CATEGORY MANAGER MODAL -->
+  <div id="category-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="category-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="category-modal-title">Book Categories</h2>
+
+      <form id="category-form" class="input-action-row">
+        <input type="hidden" id="edit-category-id" />
+        <input type="text" id="category-name-input" class="neu-input" placeholder="Enter category name..." required />
+        <button type="submit" id="save-category-btn" class="btn-primary-pill">Add Category</button>
+      </form>
+
+      <div id="admin-categories-list" class="stacked-list compact-scroll"></div>
+    </div>
+  </div>
+
+  <!-- 6. BULLETIN BOARD: ANNOUNCEMENT DETAILS & EDITOR MODALS -->
+  <div id="announcement-detail-modal" class="glass-overlay" hidden role="dialog" aria-modal="true">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="announcement-detail-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <span id="ann-detail-date" class="category-chip">Date</span>
+      <h2 id="ann-detail-title">Announcement Title</h2>
+      <img id="ann-detail-img" src="" alt="Announcement Attachment" class="ann-modal-img" hidden />
+      <p id="ann-detail-content" class="ann-full-text"></p>
+      <div id="ann-detail-admin-actions" class="form-btn-row admin-only-inline" hidden>
+        <button type="button" id="edit-ann-btn" class="neu-btn"><i data-lucide="edit-3"></i> Edit</button>
+        <button type="button" id="delete-ann-btn" class="neu-btn danger"><i data-lucide="trash-2"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="announcement-editor-modal" class="glass-overlay" hidden role="dialog" aria-modal="true">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="announcement-editor-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2 id="ann-editor-heading">Create Announcement</h2>
+      <form id="announcement-form" class="stacked-form">
+        <input type="hidden" id="edit-ann-id" />
+        <div>
+          <label class="field-label" for="ann-form-title">Announcement Title</label>
+          <input type="text" id="ann-form-title" class="neu-input" required />
+        </div>
+        <div>
+          <label class="field-label" for="ann-form-date">Publication Date</label>
+          <input type="date" id="ann-form-date" class="neu-input" required />
+        </div>
+        <div>
+          <label class="field-label" for="ann-form-image">Optional Image Upload</label>
+          <input type="file" id="ann-form-image" class="neu-input" accept="image/*" />
+        </div>
+        <div>
+          <label class="field-label" for="ann-form-content">Announcement Content</label>
+          <textarea id="ann-form-content" class="neu-input" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn-primary-pill full-width">Publish Announcement</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. HOMEPAGE CUSTOMIZATION MODAL (Admin Only) -->
+  <div id="home-customizer-modal" class="glass-overlay" hidden role="dialog" aria-modal="true">
+    <div class="glass-panel modal-md">
+      <button type="button" class="glass-close-btn" data-close-modal="home-customizer-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <h2>Customize Homepage Content</h2>
+      <form id="home-customizer-form" class="stacked-form">
+        <div>
+          <label class="field-label" for="cust-welcome-title">Welcome Message Title</label>
+          <input type="text" id="cust-welcome-title" class="neu-input" required />
+        </div>
+        <div>
+          <label class="field-label" for="cust-welcome-subtitle">Subtitle</label>
+          <input type="text" id="cust-welcome-subtitle" class="neu-input" required />
+        </div>
+        <div>
+          <label class="field-label" for="cust-library-intro">Library Introduction</label>
+          <textarea id="cust-library-intro" class="neu-input" rows="3" required></textarea>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="cust-show-featured" checked />
+          <label for="cust-show-featured">Show Featured Books Section</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="cust-show-recent" checked />
+          <label for="cust-show-recent">Show Recently Added Books Section</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="cust-show-announcements" checked />
+          <label for="cust-show-announcements">Show Latest Announcements Section</label>
+        </div>
+        <button type="submit" class="btn-primary-pill full-width">Save Homepage Layout</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. ADMINISTRATIVE DASHBOARD GLASSMORPHISM PANEL -->
+  <div id="admin-dashboard-modal" class="glass-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="admin-dash-title">
+    <div class="glass-panel modal-xl">
+      <button type="button" class="glass-close-btn" data-close-modal="admin-dashboard-modal" aria-label="Close"><i data-lucide="x"></i></button>
+      <div class="admin-dash-header">
+        <div>
+          <h2 id="admin-dash-title">LR Administrative Dashboard</h2>
+          <p class="section-desc">Manage library users, borrowing transactions, feedback, and site content</p>
+        </div>
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-admin-tab="borrows">B. Borrowed Books</button>
+          <button type="button" class="admin-tab" data-admin-tab="users">A. User Accounts</button>
+          <button type="button" class="admin-tab" data-admin-tab="feedback">C. User Feedback</button>
+          <button type="button" class="admin-tab" data-admin-tab="shortcuts">D. Library Management</button>
+        </div>
+      </div>
+
+      <!-- Tab B: Borrowed Books -->
+      <div id="admin-pane-borrows" class="admin-pane active">
+        <div class="table-responsive">
+          <table class="neu-table">
+            <thead>
+              <tr>
+                <th>Borrower</th>
+                <th>Username</th>
+                <th>Book Title</th>
+                <th>Borrowed</th>
+                <th>Expected Return</th>
+                <th>Actual Return</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-borrows-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab A: User Accounts -->
+      <div id="admin-pane-users" class="admin-pane" hidden>
+        <div class="table-responsive">
+          <table class="neu-table">
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Username</th>
+                <th>Type</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab C: User Feedback -->
+      <div id="admin-pane-feedback" class="admin-pane" hidden>
+        <div id="admin-feedback-list" class="stacked-list compact-scroll"></div>
+      </div>
+
+      <!-- Tab D: Library Management Shortcuts -->
+      <div id="admin-pane-shortcuts" class="admin-pane" hidden>
+        <div class="shortcuts-grid">
+          <button type="button" class="neu-card shortcut-tile" id="dash-shortcut-books">
+            <i data-lucide="book-plus"></i>
+            <h4>Book Management</h4>
+            <p>Add new titles, upload covers, and edit quantities</p>
+          </button>
+          <button type="button" class="neu-card shortcut-tile" id="dash-shortcut-categories">
+            <i data-lucide="folder-cog"></i>
+            <h4>Category Management</h4>
+            <p>Create, rename, or remove book classifications</p>
+          </button>
+          <button type="button" class="neu-card shortcut-tile" id="dash-shortcut-announcements">
+            <i data-lucide="megaphone"></i>
+            <h4>Announcement Management</h4>
+            <p>Publish notices and images to the Bulletin Board</p>
+          </button>
+          <button type="button" class="neu-card shortcut-tile" id="dash-shortcut-home">
+            <i data-lucide="layout-template"></i>
+            <h4>Homepage Customization</h4>
+            <p>Edit welcome messaging and toggle homepage sections</p>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="LR.js"></script>
+</body>
+</html>
