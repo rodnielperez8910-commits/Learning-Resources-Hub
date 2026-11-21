@@ -4,7 +4,7 @@
    ========================================================================== */
 
 // 1. SUPABASE CONFIGURATION (Replace with your Supabase Project Credentials)
-const SUPABASE_URL = 'https://fkjsdidutnzultropejw.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://fkjsdidutnzultropejw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_AUWEEsF69w698pCoXRhYtA_adkbcSqJ';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
